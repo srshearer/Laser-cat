@@ -6,7 +6,7 @@ Pseudo-randomly moves a servo tower (on X and Y axis) and lights up a laser. Re-
 Watch the original working : [https://www.youtube.com/watch?v=hHIrxL0giJQ](https://www.youtube.com/watch?v=hHIrxL0giJQ)
 
 
-## Set up
+## Setup
 x_servo is attached to pin 9 (and +5V and GND) and moves in the X plane.
 
 y_servo is attached to pin 6 (and +5V and GND) and moves in the Y plane.
