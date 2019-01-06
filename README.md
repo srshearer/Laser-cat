@@ -7,11 +7,9 @@ Watch the original working : [https://www.youtube.com/watch?v=hHIrxL0giJQ](https
 
 
 ## Setup
-x_servo is attached to pin 9 (and +5V and GND) and moves in the X plane.
-
-y_servo is attached to pin 6 (and +5V and GND) and moves in the Y plane.
-
-Laser is attached to pin 13 (and GND).
+* x_servo is attached to pin 12 (and +5V and GND) and moves in the X plane
+* y_servo is attached to pin 11 (and +5V and GND) and moves in the Y plane
+* Laser is attached to pin 13 (and GND)
 
 Download the code.py file, copy it to a board that runs Circuit Python, and reset the board. 
 
