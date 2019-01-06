@@ -16,14 +16,14 @@ def random_int(x, y):
 
 def main():
     # adjust for room size
-    min_x = 20
-    max_x = 105
-    min_y = 70
-    max_y = 110
+    min_x = 0
+    max_x = 70
+    min_y = 150  # keep this at 35 or above
+    max_y = 180  # keep this at 165 or below
 
     # set time range to stop in each position
-    min_freeze = 0.05
-    max_freeze = 3
+    min_freeze = 0.03
+    max_freeze = 6
     minimal_movement = 5
 
 
@@ -34,19 +34,33 @@ def main():
     laser = DigitalInOut(board.D13)
     laser.direction = Direction.OUTPUT
 
-    # x servo at pin D9
-    pwm_x = pulseio.PWMOut(board.D9, frequency=50)
-    x_servo = servo.Servo(pwm_x, min_pulse=750, max_pulse=2250)
+    # x servo pin
+    pwm_x = pulseio.PWMOut(board.D12, frequency=50)
+    x_servo = servo.Servo(pwm_x, min_pulse=750, max_pulse=1500)
+    # x_servo = servo.Servo(pwm_x, min_pulse=750, max_pulse=2250)
 
-    # y servo at pin D6
-    pwm_y = pulseio.PWMOut(board.D6, frequency=50)
-    y_servo = servo.Servo(pwm_y, min_pulse=750, max_pulse=2250)
+    # y servo pin
+    pwm_y = pulseio.PWMOut(board.D11, frequency=50)
+    y_servo = servo.Servo(pwm_y, min_pulse=750, max_pulse=1500)
 
     # finding center of square for starting point
     x_pos = int(min_x + (max_x - min_x) / 2)
     y_pos = int(min_y + (max_y - min_y) / 2)
     x_old_pos = x_pos
     y_old_pos = y_pos
+
+    x_servo.angle = min_x
+    y_servo.angle = min_y
+    time.sleep(2)
+    x_servo.angle = max_x
+    time.sleep(2)
+    y_servo.angle = max_y
+    time.sleep(2)
+
+    x_servo.angle = x_pos
+    y_servo.angle = y_pos
+
+
 
     while True:
         ## movement loop
@@ -69,6 +83,17 @@ def main():
             x_new_pos = x_new_pos + minimal_movement
         elif x_new_pos < x_old_pos and (x_new_pos - x_old_pos) < 5:
             x_new_pos = x_new_pos - minimal_movement
+
+        # verify servo positions are within min/max ranges
+        if x_new_pos < min_x:
+            x_new_pos = min_x
+        elif x_new_pos > max_x:
+            x_new_pos = max_x
+
+        if y_new_pos < min_y:
+            y_new_pos = min_y
+        elif y_new_pos > max_y:
+            y_new_pos = max_y
 
         # console output: useful for adjusting room size
         print('random_delay: {}'.format(random_delay))
