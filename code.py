@@ -3,7 +3,7 @@ import random
 import board
 import pulseio
 from adafruit_motor import servo
-from digitalio import DigitalInOut, Direction, Pull
+from digitalio import DigitalInOut, Direction
 
 
 def random_float(x, y, decimals=2):
@@ -26,22 +26,20 @@ def main():
     max_freeze = 6
     minimal_movement = 5
 
-
-    ## YOU SHOULD NOT HAVE TO MODIFY THE CODE BELOW THIS LINE ##
-
-    ## initialize laser and servos
-    # x servo at pin D13
+    ''' initialize laser and servos '''
+    # laser at pin D13
     laser = DigitalInOut(board.D13)
     laser.direction = Direction.OUTPUT
 
     # x servo pin
     pwm_x = pulseio.PWMOut(board.D12, frequency=50)
     x_servo = servo.Servo(pwm_x, min_pulse=750, max_pulse=1500)
-    # x_servo = servo.Servo(pwm_x, min_pulse=750, max_pulse=2250)
 
     # y servo pin
     pwm_y = pulseio.PWMOut(board.D11, frequency=50)
     y_servo = servo.Servo(pwm_y, min_pulse=750, max_pulse=1500)
+
+    ''' YOU SHOULD NOT HAVE TO MODIFY THE CODE BELOW THIS LINE '''
 
     # finding center of square for starting point
     x_pos = int(min_x + (max_x - min_x) / 2)
@@ -49,22 +47,10 @@ def main():
     x_old_pos = x_pos
     y_old_pos = y_pos
 
-    x_servo.angle = min_x
-    y_servo.angle = min_y
-    time.sleep(2)
-    x_servo.angle = max_x
-    time.sleep(2)
-    y_servo.angle = max_y
-    time.sleep(2)
-
     x_servo.angle = x_pos
     y_servo.angle = y_pos
 
-
-
     while True:
-        ## movement loop
-
         # laser on
         laser.value = True
 
@@ -96,11 +82,9 @@ def main():
             y_new_pos = max_y
 
         # console output: useful for adjusting room size
-        print('random_delay: {}'.format(random_delay))
-        print('x_old_pos: {}'.format(x_old_pos))
-        print('y_old_pos: {}'.format(y_old_pos))
-        print('x_new_pos: {}'.format(x_new_pos))
-        print('y_new_pos: {}\n'.format(y_new_pos))
+        print('delay:\t{}'.format(random_delay))
+        print('x:\t{}\t(old: {})'.format(x_old_pos, x_new_pos))
+        print('y:\t{}\t(old: {})\n'.format(y_old_pos, y_new_pos))
 
         # move servos into position
         x_servo.angle = x_new_pos
