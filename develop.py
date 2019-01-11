@@ -39,17 +39,18 @@ def random_int(x, y):
 def main():
     # adjust for room size
     min_x = 0
-    max_x = 70
-    min_y = 150  # keep this at 35 or above
-    max_y = 180  # keep this at 165 or below
+    max_x = 180
+
+    min_y = 0
+    max_y = 180
 
     # set speed and time range to stop in each position
     min_freeze = 0
     max_freeze = 0
-    minimal_movement = 5
-    step = 3
-    min_speed = 0.005
-    max_speed = 0.3
+    min_movement = 5
+    min_move_time = 3
+    max_move_time = 3
+    move_loop_time = 0.01
 
     ''' initialize laser and servos '''
     # laser at pin D13
@@ -84,30 +85,24 @@ def main():
 
     while True:
         # get random values x & y position, speed, and delay
-        x_new_pos = random_int(min_x, max_x)
-        y_new_pos = random_int(min_y, max_y)
+        # x_new_pos = random_int(min_x, max_x)
+        # y_new_pos = random_int(min_y, max_y)
+        x_new_pos = random_float(min_x, max_x)
+        y_new_pos = random_float(min_y, max_y)
 
         random_delay = random_float(min_freeze, max_freeze)
-        speed = random_float(min_speed, max_speed, 3)
+        move_time = random_float(min_move_time, max_move_time, 3)
 
         # adjust for minimum movement deltas
-        if x_new_pos > x_old_pos:
-            x_step = step
-            if (x_new_pos - x_old_pos) < minimal_movement:
-                x_new_pos = x_new_pos + minimal_movement
-        elif x_new_pos < x_old_pos:
-            x_step = (step * -1)
-            if (x_new_pos - x_old_pos) < minimal_movement:
-                x_new_pos = x_new_pos - minimal_movement
+        if x_new_pos > x_old_pos and (x_new_pos - x_old_pos) < min_movement:
+                x_new_pos = x_new_pos + min_movement
+        elif x_new_pos < x_old_pos and (x_new_pos - x_old_pos) < min_movement:
+                x_new_pos = x_new_pos - min_movement
 
-        if y_new_pos > y_old_pos:
-            y_step = step
-            if (y_new_pos - y_old_pos) < minimal_movement:
-                y_new_pos = y_new_pos + minimal_movement
-        elif y_new_pos < y_old_pos:
-            y_step = (step * -1)
-            if (y_new_pos - y_old_pos) < minimal_movement:
-                y_new_pos = y_new_pos - minimal_movement
+        if y_new_pos > y_old_pos and (y_new_pos - y_old_pos) < min_movement:
+                y_new_pos = y_new_pos + min_movement
+        elif y_new_pos < y_old_pos and (y_new_pos - y_old_pos) < min_movement:
+                y_new_pos = y_new_pos - min_movement
 
         # verify servo positions are within min/max ranges
         if x_new_pos < min_x:
@@ -120,31 +115,50 @@ def main():
         elif y_new_pos > max_y:
             y_new_pos = max_y
 
+        # determine angle change per loop based on travel distance and time
+        x_delta = abs(x_old_pos - x_new_pos)
+        x_steps = (move_time / move_loop_time)
+        x_step = (x_delta / x_steps)
+        if x_step == 0:
+            x_step = 1
+        if x_new_pos < x_old_pos:
+            x_step = (x_step * -1)
+
+        y_delta = abs(y_old_pos - y_new_pos)
+        y_steps = (move_time / move_loop_time)
+        y_step = (y_delta / y_steps)
+        if y_step == 0:
+            y_step = 1
+        if y_new_pos < y_old_pos:
+            y_step = (x_step * -1)
+
         # console output: useful for adjusting room size
         print('\n- - - - -')
         print('delay:\t{}'.format(random_delay))
-        print('speed:\t{}'.format(speed))
-        print('x:\t{}\t(old: {})'.format(x_old_pos, x_new_pos))
-        print('y:\t{}\t(old: {})'.format(y_old_pos, y_new_pos))
+        print('move_time:\t{}'.format(move_time))
+        print('x:\t{}\t(old: {})\t(delta: {})\t(step: {})'.format(
+            x_old_pos, x_new_pos, x_delta, x_step))
+        print('y:\t{}\t(old: {})\t(delta: {})\t(step: {})'.format(
+            y_old_pos, y_new_pos, y_delta, y_step))
         print('- - - - -')
 
         # move servos into position
-        print('x_angle:\t{}\ty_angle:\t{} (START)'.format(
+        print('x_angle:\t{}\t/\ty_angle:\t{} (START)'.format(
             x_servo.angle, y_servo.angle))
 
-        for x_angle, y_angle in itertools.product(
+        for x_angle, y_angle in zip(
                 range(x_old_pos, x_new_pos, x_step),
                 range(y_old_pos, y_new_pos, y_step)
         ):
             x_servo.angle = x_angle
             y_servo.angle = y_angle
-            print('x_angle:\t{}\ty_angle:\t{}'.format(
+            print('x_angle:\t{}\t/\ty_angle:\t{}'.format(
                 x_servo.angle, y_servo.angle))
-            time.sleep(speed)
+            time.sleep(move_loop_time)
 
         x_servo.angle = x_new_pos
         y_servo.angle = y_new_pos
-        print('x_angle:\t{}\ty_angle:\t{} (END)\n- - - - -'.format(
+        print('x_angle:\t{}\t/\ty_angle:\t{} (END)\n- - - - -'.format(
             x_servo.angle, y_servo.angle))
 
         # set new positions as old for the next loop
