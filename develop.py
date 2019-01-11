@@ -45,10 +45,10 @@ def main():
     max_y = 180
 
     # set speed and time range to stop in each position
-    min_freeze = 0
-    max_freeze = 0
+    min_freeze = 1
+    max_freeze = 1
     min_movement = 5
-    min_move_time = 3
+    min_move_time = 0.1
     max_move_time = 3
     move_loop_time = 0.01
 
@@ -87,8 +87,8 @@ def main():
         # get random values x & y position, speed, and delay
         # x_new_pos = random_int(min_x, max_x)
         # y_new_pos = random_int(min_y, max_y)
-        x_new_pos = random_float(min_x, max_x)
-        y_new_pos = random_float(min_y, max_y)
+        x_new_pos = random_int(min_x, max_x)
+        y_new_pos = random_int(min_y, max_y)
 
         random_delay = random_float(min_freeze, max_freeze)
         move_time = random_float(min_move_time, max_move_time, 3)
@@ -117,6 +117,7 @@ def main():
 
         # determine angle change per loop based on travel distance and time
         x_delta = abs(x_old_pos - x_new_pos)
+        # x_step = 5
         x_steps = (move_time / move_loop_time)
         x_step = (x_delta / x_steps)
         if x_step == 0:
@@ -125,6 +126,7 @@ def main():
             x_step = (x_step * -1)
 
         y_delta = abs(y_old_pos - y_new_pos)
+        # y_step = 5
         y_steps = (move_time / move_loop_time)
         y_step = (y_delta / y_steps)
         if y_step == 0:
@@ -137,27 +139,47 @@ def main():
         print('delay:\t{}'.format(random_delay))
         print('move_time:\t{}'.format(move_time))
         print('x:\t{}\t(old: {})\t(delta: {})\t(step: {})'.format(
-            x_old_pos, x_new_pos, x_delta, x_step))
+            x_new_pos, x_old_pos, x_delta, x_step))
         print('y:\t{}\t(old: {})\t(delta: {})\t(step: {})'.format(
-            y_old_pos, y_new_pos, y_delta, y_step))
+            y_new_pos, y_old_pos, y_delta, y_step))
         print('- - - - -')
 
         # move servos into position
         print('x_angle:\t{}\t/\ty_angle:\t{} (START)'.format(
             x_servo.angle, y_servo.angle))
 
-        for x_angle, y_angle in zip(
-                range(x_old_pos, x_new_pos, x_step),
-                range(y_old_pos, y_new_pos, y_step)
-        ):
-            x_servo.angle = x_angle
-            y_servo.angle = y_angle
+        x_angle = x_servo.angle
+        y_angle = y_servo.angle
+        while x_servo.angle != x_new_pos or y_servo.angle != y_new_pos:
+            if x_servo.angle != x_new_pos:
+                x_angle += x_step
+                if (x_angle > x_new_pos and x_step > 0) or (x_angle < x_new_pos and x_step < 0):
+                    x_angle = x_new_pos
+
+            if y_servo.angle != y_new_pos:
+                y_angle += y_step
+                if (y_angle > y_new_pos and y_step > 0) or (y_angle < y_new_pos and y_step < 0):
+                    y_angle = y_new_pos
+
+            if x_servo.angle != int(x_angle):
+                x_servo.angle = int(x_angle)
+
+            if y_servo.angle != int(y_angle):
+                y_servo.angle = int(y_angle)
+
             print('x_angle:\t{}\t/\ty_angle:\t{}'.format(
                 x_servo.angle, y_servo.angle))
             time.sleep(move_loop_time)
 
-        x_servo.angle = x_new_pos
-        y_servo.angle = y_new_pos
+        # for x_angle, y_angle in zip(
+        #         range(x_old_pos, x_new_pos, x_step),
+        #         range(y_old_pos, y_new_pos, y_step)
+        # ):
+        # x_servo.angle = x_angle
+        # y_servo.angle = y_angle
+
+        # x_servo.angle = x_new_pos
+        # y_servo.angle = y_new_pos
         print('x_angle:\t{}\t/\ty_angle:\t{} (END)\n- - - - -'.format(
             x_servo.angle, y_servo.angle))
 
